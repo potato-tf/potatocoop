@@ -132,24 +132,15 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     //bots 
     // SetValue("allow_all_bot_survivor_team", 1);
     // SetValue("sb_all_bot_game", 1);
-    SetValue("z_special_spawn_interval", 12);
+    // SetValue("z_special_spawn_interval", 12);
 
     //maxplayers override, requires plugins
     SetValue("sv_maxplayers", 8);
     SetValue("sv_visiblemaxplayers", 8);
-    SetValue("sv_removehumanlimit", 1);
-    SetValue("l4d_survivor_limit", 8);
-    SetValue("l4d_static_minimum_survivor", 8);
     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
     SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
     SendToServerConsole("sm_cvar l4d_autojoin 2");
 
-    while (GetFloat("l4d_survivor_limit") != 8)
-    {
-        SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
-        SendToServerConsole("sm_cvar l4d_autojoin 2");
-    }
     //8 slots 
     // while (GetFloat("l4d_multislots_max_survivors") != 8)
     // {   
@@ -177,8 +168,6 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
 }
 
 //speedrun timer, doesn't work on dedicated :/
-SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
-HUDSetLayout(SpeedrunHUD);
 
 //replace all map spawned scouts
 //does this even work?
@@ -254,7 +243,7 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
         })
         // nonflashbang.__KeyValueFromString("rendercolor", "255 193 159");
         
-        for ( local flashbang; flashbang = Entities.FindByClassname(flashbang, "env_lightglow"); )
+        for ( local flashbang; flashbang = FindByClassname(flashbang, "env_lightglow"); )
         {
             printl(flashbang)
             if (flashbang.GetName() != "newlightglow")
@@ -345,18 +334,30 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     }
 }
 
-//model swap stuff for shield
-//this is also being used as a general map-wide think function right now
-::ShieldThink <- function()
+//general think function
+::MainThink <- function()
 {
-    
+
+    //idk why just putting this cvar in server.cfg or SetCVars doesn't work
     if (GetFloat("l4d_survivor_limit") != 8)
     {
         SendToServerConsole("sm_cvar l4d_survivor_limit 8");
         SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
         SendToServerConsole("sm_cvar l4d_autojoin 2");
     }
-    for (local shield; shield = Entities.FindByClassname(shield, "weapon_melee"); )
+
+    //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
+    for (local i = 1; i < GetFloat("l4d_survivor_limit"); i++)
+    {
+        local player = PlayerInstanceFromIndex(i)
+        if (player != null && player.GetModelName() == "models/survivors/survivor_teenangst.mdl" && GetPropInt(player, "m_survivorCharacter") !=5 )
+        {
+            SetPropInt(player, "m_survivorCharacter", 5)
+        }
+    }
+
+    //replace cricket bat with riot shield
+    for (local shield; shield = FindByClassname(shield, "weapon_melee"); )
     {
         local owner = GetPropEntity(shield, "m_hOwner");
         local viewmodel = GetPropEntity(owner, "m_hViewModel");
@@ -368,38 +369,14 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
         if (viewmodel.GetModelName() ==  "models/weapons/melee/v_cricket_bat.mdl")
             viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
     }
+
+    //replace cricket bat world model 
+    //does not work lol
     for (local cricketbat; cricketbat = Entities.FindByModel(cricketbat, "models/weapons/melee/w_cricket_bat.mdl"); )
     {
         printl(cricketbat);
         cricketbat.SetModel("models/weapons/melee/w_riotshield.mdl");
     }
-
-    //this doesn't really belong in this function but I cba to make another think
-    // if (GetFloat("l4d_multislots_max_survivors") != 8)
-    // {
-    //     SetValue("l4d_multislots_max_survivors", 8);
-    //     SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
-    //     SetValue("l4d_multislots_respawnhp", 100);
-    //     SetValue("l4d_multislots_respawnbuffhp", 0);
-    //     SetValue("l4d_multislots_firstweapon", 0);
-    //     SetValue("l4d_multislots_secondweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-    //     SetValue("l4d_multislots_forthweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-
-    //     //just in case
-    //     SendToServerConsole("l4d_multislots_max_survivors 8");
-    //     SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
-    //     SendToServerConsole("l4d_multislots_respawnhp 100");
-    //     SendToServerConsole("l4d_multislots_respawnbuffhp 0");
-    //     SendToServerConsole("l4d_multislots_firstweapon 0");
-    //     SendToServerConsole("l4d_multislots_secondweapon 0");
-    //     SendToServerConsole("l4d_multislots_thirdweapon 0");
-    //     SendToServerConsole("l4d_multislots_forthweapon 0");
-    //     SendToServerConsole("l4d_multislots_fifthweapon 0");
-    //     SendToServerConsole("sv_force_unreserved 1");
-    // } 
-
 }
 
 //all event functions below
@@ -413,18 +390,20 @@ function OnGameEvent_round_start_post_nav(params)
     // SetValue("l4d_multislots_spawn_survivors_roundstart", 1);    
     // SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
     // SendToServerConsole("l4d_multislots_max_survivors 8");
+    SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
+    HUDSetLayout(SpeedrunHUD);
 
     //apply think function to an ent that exists in every map
-    for (saferoomdoor; saferoomdoor = Entities.FindByClassname(saferoomdoor, "prop_door_rotating_checkpoint"); )
+    for (saferoomdoor; saferoomdoor = FindByClassname(saferoomdoor, "prop_door_rotating_checkpoint"); )
     {
         printl(saferoomdoor)
         saferoomdoor.ValidateScriptScope();
-        saferoomdoor.GetScriptScope().ShieldThink <- ShieldThink;
-        AddThinkToEnt(saferoomdoor, "ShieldThink");
+        saferoomdoor.GetScriptScope().MainThink <- MainThink;
+        AddThinkToEnt(saferoomdoor, "MainThink");
     }
 
     //add a targetname to the info_director for easier access
-    for (local infodirector; infodirector = Entities.FindByClassname(infodirector, "info_director"); )
+    for (local infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
     {
         originalname = infodirector.GetName()
         printl("directorname: " + originalname)
@@ -432,7 +411,7 @@ function OnGameEvent_round_start_post_nav(params)
 
     //replace cricket bat with riot shield
     
-    for (local cricket; cricket = Entities.FindByClassname(cricket, "weapon_melee_spawn"); )
+    for (local cricket; cricket = FindByClassname(cricket, "weapon_melee_spawn"); )
     {
         if ((cricket.GetModelName() == "models/weapons/melee/w_cricket_bat.mdl"))
         {
@@ -445,7 +424,7 @@ function OnGameEvent_round_start_post_nav(params)
     }
 
     // 1 in 5 chance to spawn a scout instead of a chrome
-    for (local chrome; chrome = Entities.FindByClassname(chrome, "weapon_shotgun_chrome_spawn"); )
+    for (local chrome; chrome = FindByClassname(chrome, "weapon_shotgun_chrome_spawn"); )
     {
         local rand = RandomInt(1, 5);
 
@@ -465,7 +444,7 @@ function OnGameEvent_round_start_post_nav(params)
     }
 
     //generic weapon_spawn too
-    for (local chrome2; chrome2 = Entities.FindByClassname(chrome2, "weapon_spawn"); )
+    for (local chrome2; chrome2 = FindByClassname(chrome2, "weapon_spawn"); )
     {
     //    printl(chrome2 + " ID:" + GetPropInt(chrome2, "m_weaponID") + " Location:" + chrome2.GetLocalOrigin());
         if (GetPropInt(chrome2, "m_weaponID") != 8) return;
@@ -489,6 +468,7 @@ function OnGameEvent_round_start_post_nav(params)
 }
 
 //leaker model stuff
+//this also forces real zoey with the 8 player stuff
 function OnGameEvent_player_spawn(params)
 {
     local player = GetPlayerFromUserID(params.userid)
@@ -562,7 +542,7 @@ function OnGameEvent_survivor_call_for_help(params)
     //the large radius by default is to take care of cases like c2m2 bathrooms where there are a bunch of rescue closets behind separate doors
     //this will certainly cause issues elsewhere (like c1m2_streets gun store closet and c2m3_coaster maintenance room closet)
     //map-specific overrides take care of this
-    for (local doors; doors = Entities.FindByClassnameWithin(doors, "*_door*", player.GetOrigin(), closetradius); )
+    for (local doors; doors = FindByClassnameWithin(doors, "*_door*", player.GetOrigin(), closetradius); )
     {
         DoEntFire("!activator", "Close", "", 0.0, doors, doors);
         DoEntFire("!activator", "Lock", "", 0.1, doors, doors);
