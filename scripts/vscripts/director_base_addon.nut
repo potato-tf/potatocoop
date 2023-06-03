@@ -349,11 +349,10 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
     for (local i = 1; i < GetFloat("l4d_survivor_limit"); i++)
     {
-        local player = PlayerInstanceFromIndex(i)
+        local player = PlayerInstanceFromIndex(i);
         if (player != null && player.GetModelName() == "models/survivors/survivor_teenangst.mdl" && GetPropInt(player, "m_survivorCharacter") !=5 )
-        {
-            SetPropInt(player, "m_survivorCharacter", 5)
-        }
+            SetPropInt(player, "m_survivorCharacter", 5);
+        
     }
 
     //replace cricket bat with riot shield
@@ -396,18 +395,16 @@ function OnGameEvent_round_start_post_nav(params)
     //apply think function to an ent that exists in every map
     for (saferoomdoor; saferoomdoor = FindByClassname(saferoomdoor, "prop_door_rotating_checkpoint"); )
     {
-        printl(saferoomdoor)
         saferoomdoor.ValidateScriptScope();
         saferoomdoor.GetScriptScope().MainThink <- MainThink;
         AddThinkToEnt(saferoomdoor, "MainThink");
     }
 
-    //add a targetname to the info_director for easier access
+    //get info_director name since we change it to something else for rescue closets
+    //not setting this back to the original name will break many events (c10m3_ranchhouse, c2m1_streets cola event, etc)
     for (local infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
-    {
         originalname = infodirector.GetName()
-        printl("directorname: " + originalname)
-    }
+    
 
     //replace cricket bat with riot shield
     
@@ -610,40 +607,42 @@ function OnGameEvent_item_pickup(params)
 //give sg552 a laser sight while scoped
 function OnGameEvent_weapon_fire(params)
 {
-    local player = GetPlayerFromUserID(params.userid)
-    local wep = params.weapon
+    local player = GetPlayerFromUserID(params.userid);
+    local wep = params.weapon;
+    local weapon = GetPropEntity(player, "m_hActiveWeapon");
 
-    if (wep != "rifle_sg552") return;
-    
-    // local weapon = GetPropEntity(player, "m_hActiveWeapon")
     // printl(weapon)
 
-    //was gonna consume double ammo and do extra fancy stuff with the damage output, but I don't care enough to learn how tracelines work
-    if (GetPropEntity(player, "m_hZoomOwner") == null)
-        // weapon.SetClip1(weapon.Clip1() - 1);
-        player.RemoveUpgrade(UPGRADE_LASER_SIGHT);
+    if (GetPropEntity(player, "m_hZoomOwner") != null && wep == "rifle_sg552")
+    {
+        weapon.SetClip1(weapon.Clip1() - 1);
+        player.GiveUpgrade(UPGRADE_LASER_SIGHT);
         return;
+    }
+    player.RemoveUpgrade(UPGRADE_LASER_SIGHT);
 }
 
-function OnGameEvent_weapon_zoom(params)
-{
-    local player = GetPlayerFromUserID(params.userid)
-    local weapon = GetPropEntity(player, "m_hActiveWeapon")
+// function OnGameEvent_weapon_zoom(params)
+// {
+//     local player = GetPlayerFromUserID(params.userid)
+//     local weapon = GetPropEntity(player, "m_hActiveWeapon")
 
-    if (weapon.GetClassname() != "weapon_rifle_sg552") return;
-    
-    player.GiveUpgrade(UPGRADE_LASER_SIGHT);
-}
+//     if (weapon.GetClassname() != "weapon_rifle_sg552") return;
+// }
 
 //tank rage, faster move speed and attack speed
 function OnGameEvent_zombie_ignited(params)
 {
-    local tank = params.victimname
+    local tank = params.victimname;
     if (tank != "Tank" ) return;
 
-    SetValue("z_tank_speed", 230)
-    SetValue("z_tank_attack_interval", 1)
-
+    SetValue("z_tank_speed", 230);
+    SetValue("z_tank_attack_interval", 1);
+}
+function OnGameEvent_tank_killed(params)
+{
+    SetValue("z_tank_speed", 210);
+    SetValue("z_tank_attack_interval", 1.5);
 }
 
 //bile rounds for explosive ammo on grenade launcher
