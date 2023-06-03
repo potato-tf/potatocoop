@@ -2,7 +2,7 @@
 //by Braindawg
 
 //stole from give_tf_weapon library but it fails to include here?
-// IncludeScript("netpropperf.nut")
+IncludeScript("netpropperf.nut")
 
 
 const CRAWL_SPEED = 20;
@@ -358,8 +358,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     }
     for (local shield; shield = Entities.FindByClassname(shield, "weapon_melee"); )
     {
-        local owner = NetProps.GetPropEntity(shield, "m_hOwner");
-        local viewmodel = NetProps.GetPropEntity(owner, "m_hViewModel");
+        local owner = GetPropEntity(shield, "m_hOwner");
+        local viewmodel = GetPropEntity(owner, "m_hViewModel");
         
         if (owner == null) return;
         
@@ -436,8 +436,8 @@ function OnGameEvent_round_start_post_nav(params)
     {
         if ((cricket.GetModelName() == "models/weapons/melee/w_cricket_bat.mdl"))
         {
-            // NetProps.SetPropInt(cricket, "m_nModelIndex", RIOT_INDEX);
-            NetProps.SetPropString(cricket, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
+            // SetPropInt(cricket, "m_nModelIndex", RIOT_INDEX);
+            SetPropString(cricket, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
             cricket.SetModel("models/weapons/melee/w_riotshield.mdl");
             cricket.SetAngles(cricket.GetAngles() - QAngle(0 90 0));
         }
@@ -454,7 +454,7 @@ function OnGameEvent_round_start_post_nav(params)
             SpawnEntityFromTable("weapon_sniper_scout_spawn", {
                 origin = chrome.GetLocalOrigin(),
                 angles = chrome.GetLocalAngles().ToKVString(),
-                count = NetProps.GetPropInt(chrome, "m_itemCount")
+                count = GetPropInt(chrome, "m_itemCount")
             })
             printl("replaced " + chrome + " at " + chrome.GetLocalOrigin())
             chrome.Kill()
@@ -467,8 +467,8 @@ function OnGameEvent_round_start_post_nav(params)
     //generic weapon_spawn too
     for (local chrome2; chrome2 = Entities.FindByClassname(chrome2, "weapon_spawn"); )
     {
-    //    printl(chrome2 + " ID:" + NetProps.GetPropInt(chrome2, "m_weaponID") + " Location:" + chrome2.GetLocalOrigin());
-        if (NetProps.GetPropInt(chrome2, "m_weaponID") != 8) return;
+    //    printl(chrome2 + " ID:" + GetPropInt(chrome2, "m_weaponID") + " Location:" + chrome2.GetLocalOrigin());
+        if (GetPropInt(chrome2, "m_weaponID") != 8) return;
 
         local rand = RandomInt(1, 5);
 
@@ -477,7 +477,7 @@ function OnGameEvent_round_start_post_nav(params)
             SpawnEntityFromTable("weapon_sniper_scout_spawn", {
                 origin = chrome2.GetLocalOrigin(),
                 angles = chrome2.GetLocalAngles().ToKVString(),
-                count = NetProps.GetPropInt(chrome2, "m_itemCount")
+                count = GetPropInt(chrome2, "m_itemCount")
             })
             printl("replaced " + chrome2 + " at " + chrome2.GetLocalOrigin())
             chrome2.Kill()
@@ -493,11 +493,11 @@ function OnGameEvent_player_spawn(params)
 {
     local player = GetPlayerFromUserID(params.userid)
 
-    // printl(player + "Zombie Type: " + player.GetZombieType() + " Variant: " + NetProps.GetPropInt(player, "m_nVariantType") )
+    // printl(player + "Zombie Type: " + player.GetZombieType() + " Variant: " + GetPropInt(player, "m_nVariantType") )
 
     if (player.GetZombieType() != 2) return;
 
-    if (NetProps.GetPropInt(player, "m_nVariantType") == 1 )
+    if (GetPropInt(player, "m_nVariantType") == 1 )
     {
         player.SetModel("models/infected/boomette.mdl");
         return;
@@ -595,9 +595,9 @@ function OnGameEvent_item_pickup(params)
 {
     local player = GetPlayerFromUserID(params.userid)
     local weapon = params.item;
-    local viewmodel = NetProps.GetPropEntity(player, "m_hViewModel");
-    local vmindex = NetProps.GetPropInt(viewmodel, "m_nModelIndex");
-    local wepent = NetProps.GetPropEntity(player, "m_hActiveWeapon");
+    local viewmodel = GetPropEntity(player, "m_hViewModel");
+    local vmindex = GetPropInt(viewmodel, "m_nModelIndex");
+    local wepent = GetPropEntity(player, "m_hActiveWeapon");
     // printl(weapon);
 
     //replace cricket bat with riot shield
@@ -605,15 +605,15 @@ function OnGameEvent_item_pickup(params)
     // {
     //     printl(wepent);
     //     printl(vmindex);
-    //     printl(NetProps.GetPropInt(wepent, "m_nModelIndex"));
+    //     printl(GetPropInt(wepent, "m_nModelIndex"));
     //     if (vmindex == CRICKET_INDEX)
     //     {
-    //         NetProps.SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
-    //         NetProps.SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
+    //         SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
+    //         SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
     //         viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
 
-    //         NetProps.SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
-    //         NetProps.SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
+    //         SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
+    //         SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
     //         wepent.SetModel("models/weapons/melee/w_riotshield.mdl");
     //         hasriotshield = true;
     //     }
@@ -635,11 +635,11 @@ function OnGameEvent_weapon_fire(params)
 
     if (wep != "rifle_sg552") return;
     
-    // local weapon = NetProps.GetPropEntity(player, "m_hActiveWeapon")
+    // local weapon = GetPropEntity(player, "m_hActiveWeapon")
     // printl(weapon)
 
     //was gonna consume double ammo and do extra fancy stuff with the damage output, but I don't care enough to learn how tracelines work
-    if (NetProps.GetPropEntity(player, "m_hZoomOwner") == null)
+    if (GetPropEntity(player, "m_hZoomOwner") == null)
         // weapon.SetClip1(weapon.Clip1() - 1);
         player.RemoveUpgrade(UPGRADE_LASER_SIGHT);
         return;
@@ -648,7 +648,7 @@ function OnGameEvent_weapon_fire(params)
 function OnGameEvent_weapon_zoom(params)
 {
     local player = GetPlayerFromUserID(params.userid)
-    local weapon = NetProps.GetPropEntity(player, "m_hActiveWeapon")
+    local weapon = GetPropEntity(player, "m_hActiveWeapon")
 
     if (weapon.GetClassname() != "weapon_rifle_sg552") return;
     
@@ -672,7 +672,7 @@ function OnGameEvent_receive_upgrade(params)
     local player = GetPlayerFromUserID(params.userid)
     local upgrade = params.upgrade
 
-    if ((NetProps.GetPropEntity(player, "m_hActiveWeapon") == "weapon_grenade_launcher") && (upgrade == EXPLOSIVE_AMMO))
+    if ((GetPropEntity(player, "m_hActiveWeapon") == "weapon_grenade_launcher") && (upgrade == EXPLOSIVE_AMMO))
         printl("TODO: Add bile rounds here")
 }
 
