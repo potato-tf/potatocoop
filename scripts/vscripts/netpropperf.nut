@@ -26,6 +26,7 @@
 //testing
 //these are less for performance reasons and moreso syntax
 ::SetValue <- ::Convars.SetValue.bindenv(::Convars);
+::GetFloat <- ::Convars.GetFloat.bindenv(::Convars);
 
 ::RemoveOutput <- ::EntityOutputs.RemoveOutput.bindenv(::EntityOutputs);
 ::AddOutput <- ::EntityOutputs.AddOutput.bindenv(::EntityOutputs);

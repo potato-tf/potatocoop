@@ -107,61 +107,61 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
 //cvars
 ::SetCVars <- function()
 {
-    Convars.SetValue("survivor_allow_crawling", 1);
-    Convars.SetValue("survivor_crawl_speed", CRAWL_SPEED);
-    Convars.SetValue("boomer_leaker_chance", 20);
-    Convars.SetValue("smoker_tongue_delay", 0.5);
-    Convars.SetValue("z_health", 10);
-    Convars.SetValue("z_jockey_health", 250);
-    Convars.SetValue("z_difficulty", "impossible");
-    Convars.SetValue("mp_friendlyfire", 0);
-    Convars.SetValue("survivor_burn_factor_expert ", 0.2);
+    SetValue("survivor_allow_crawling", 1);
+    SetValue("survivor_crawl_speed", CRAWL_SPEED);
+    SetValue("boomer_leaker_chance", 20);
+    SetValue("smoker_tongue_delay", 0.5);
+    SetValue("z_health", 10);
+    SetValue("z_jockey_health", 250);
+    SetValue("z_difficulty", "impossible");
+    SetValue("mp_friendlyfire", 0);
+    SetValue("survivor_burn_factor_expert ", 0.2);
 
     SendToServerConsole("sm_cvar survivor_friendly_fire_factor_normal 0");
     SendToServerConsole("sm_cvar survivor_friendly_fire_factor_hard 0");
     SendToServerConsole("sm_cvar survivor_friendly_fire_factor_expert 0");
 
     //100 tick related
-    Convars.SetValue("sv_maxupdaterate", 100); 
-    Convars.SetValue("sv_maxcmdrate", 100); 
-    Convars.SetValue("net_splitpacket_maxrate", 100000); 
-    Convars.SetValue("fps_max", 150); 
-    Convars.SetValue("nb_update_frequency", 0.03); 
+    SetValue("sv_maxupdaterate", 100); 
+    SetValue("sv_maxcmdrate", 100); 
+    SetValue("net_splitpacket_maxrate", 100000); 
+    SetValue("fps_max", 150); 
+    SetValue("nb_update_frequency", 0.03); 
     SendToServerConsole("nb_update_frequency 0.03");
 
     //bots 
-    // Convars.SetValue("allow_all_bot_survivor_team", 1);
-    // Convars.SetValue("sb_all_bot_game", 1);
-    Convars.SetValue("z_special_spawn_interval", 12);
+    // SetValue("allow_all_bot_survivor_team", 1);
+    // SetValue("sb_all_bot_game", 1);
+    SetValue("z_special_spawn_interval", 12);
 
     //maxplayers override, requires plugins
-    Convars.SetValue("sv_maxplayers", 8);
-    Convars.SetValue("sv_visiblemaxplayers", 8);
-    Convars.SetValue("sv_removehumanlimit", 1);
-    Convars.SetValue("l4d_survivor_limit", 8);
-    Convars.SetValue("l4d_static_minimum_survivor", 8);
+    SetValue("sv_maxplayers", 8);
+    SetValue("sv_visiblemaxplayers", 8);
+    SetValue("sv_removehumanlimit", 1);
+    SetValue("l4d_survivor_limit", 8);
+    SetValue("l4d_static_minimum_survivor", 8);
     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
     SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
     SendToServerConsole("sm_cvar l4d_autojoin 2");
 
-    while (Convars.GetFloat("l4d_survivor_limit") != 8)
+    while (GetFloat("l4d_survivor_limit") != 8)
     {
         SendToServerConsole("sm_cvar l4d_survivor_limit 8");
         SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
         SendToServerConsole("sm_cvar l4d_autojoin 2");
     }
     //8 slots 
-    // while (Convars.GetFloat("l4d_multislots_max_survivors") != 8)
+    // while (GetFloat("l4d_multislots_max_survivors") != 8)
     // {   
-    //     Convars.SetValue("l4d_multislots_max_survivors", 8);
-    //     Convars.SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
-    //     Convars.SetValue("l4d_multislots_respawnhp", 100);
-    //     Convars.SetValue("l4d_multislots_respawnbuffhp", 0);
-    //     Convars.SetValue("l4d_multislots_firstweapon", 0);
-    //     Convars.SetValue("l4d_multislots_secondweapon", 0);
-    //     Convars.SetValue("l4d_multislots_thirdweapon", 0);
-    //     Convars.SetValue("l4d_multislots_forthweapon", 0);
-    //     Convars.SetValue("l4d_multislots_thirdweapon", 0);
+    //     SetValue("l4d_multislots_max_survivors", 8);
+    //     SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
+    //     SetValue("l4d_multislots_respawnhp", 100);
+    //     SetValue("l4d_multislots_respawnbuffhp", 0);
+    //     SetValue("l4d_multislots_firstweapon", 0);
+    //     SetValue("l4d_multislots_secondweapon", 0);
+    //     SetValue("l4d_multislots_thirdweapon", 0);
+    //     SetValue("l4d_multislots_forthweapon", 0);
+    //     SetValue("l4d_multislots_thirdweapon", 0);
 
     //     //just in case
     //     SendToServerConsole("l4d_multislots_max_survivors 8");
@@ -350,7 +350,7 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 ::ShieldThink <- function()
 {
     
-    if (Convars.GetFloat("l4d_survivor_limit") != 8)
+    if (GetFloat("l4d_survivor_limit") != 8)
     {
         SendToServerConsole("sm_cvar l4d_survivor_limit 8");
         SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
@@ -375,17 +375,17 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     }
 
     //this doesn't really belong in this function but I cba to make another think
-    // if (Convars.GetFloat("l4d_multislots_max_survivors") != 8)
+    // if (GetFloat("l4d_multislots_max_survivors") != 8)
     // {
-    //     Convars.SetValue("l4d_multislots_max_survivors", 8);
-    //     Convars.SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
-    //     Convars.SetValue("l4d_multislots_respawnhp", 100);
-    //     Convars.SetValue("l4d_multislots_respawnbuffhp", 0);
-    //     Convars.SetValue("l4d_multislots_firstweapon", 0);
-    //     Convars.SetValue("l4d_multislots_secondweapon", 0);
-    //     Convars.SetValue("l4d_multislots_thirdweapon", 0);
-    //     Convars.SetValue("l4d_multislots_forthweapon", 0);
-    //     Convars.SetValue("l4d_multislots_thirdweapon", 0);
+    //     SetValue("l4d_multislots_max_survivors", 8);
+    //     SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
+    //     SetValue("l4d_multislots_respawnhp", 100);
+    //     SetValue("l4d_multislots_respawnbuffhp", 0);
+    //     SetValue("l4d_multislots_firstweapon", 0);
+    //     SetValue("l4d_multislots_secondweapon", 0);
+    //     SetValue("l4d_multislots_thirdweapon", 0);
+    //     SetValue("l4d_multislots_forthweapon", 0);
+    //     SetValue("l4d_multislots_thirdweapon", 0);
 
     //     //just in case
     //     SendToServerConsole("l4d_multislots_max_survivors 8");
@@ -409,8 +409,8 @@ function OnGameEvent_round_start_post_nav(params)
 {
     SetCVars();
     MapOverrides();
-    // Convars.SetValue("l4d_multislots_max_survivors", 8);
-    // Convars.SetValue("l4d_multislots_spawn_survivors_roundstart", 1);    
+    // SetValue("l4d_multislots_max_survivors", 8);
+    // SetValue("l4d_multislots_spawn_survivors_roundstart", 1);    
     // SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
     // SendToServerConsole("l4d_multislots_max_survivors 8");
 
@@ -661,8 +661,8 @@ function OnGameEvent_zombie_ignited(params)
     local tank = params.victimname
     if (tank != "Tank" ) return;
 
-    Convars.SetValue("z_tank_speed", 230)
-    Convars.SetValue("z_tank_attack_interval", 1)
+    SetValue("z_tank_speed", 230)
+    SetValue("z_tank_attack_interval", 1)
 
 }
 
