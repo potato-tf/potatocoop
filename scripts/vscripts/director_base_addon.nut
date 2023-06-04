@@ -723,7 +723,7 @@ const MAX_WEAPONS = 6;
 	local hasRealLaser = (scope != null && ("HasRealLaser" in scope));
 	
 	if( developer() )
-		printl( "SG552 has real laser: " + hasRealLaser );
+	    printl( "SG552 has real laser: " + hasRealLaser );
   
 	if( !hasRealLaser )
 	{
@@ -885,7 +885,7 @@ const MAX_WEAPONS = 6;
 	scope["HasRealLaser"] <- val;
 	
 	if( developer() )
-		printl( "SetHasRealLaser: " + weapon.GetClassname() + " to " + val );
+	    printl( "SetHasRealLaser: " + weapon.GetClassname() + " to " + val );
 }
 ::SetHasRealLaser <- ::DawgSG552.SetHasRealLaser.weakref().ref()
 
@@ -914,7 +914,7 @@ function OnGameEvent_zombie_ignited(params)
     local tank = params.victimname;
     if (tank != "Tank" ) return;
 
-    SetValue("z_tank_speed", 230);
+    SetValue("z_tank_speed", 240);
     SetValue("z_tank_attack_interval", 1);
 }
 function OnGameEvent_tank_killed(params)
