@@ -142,31 +142,6 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
     SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
     SendToServerConsole("sm_cvar l4d_autojoin 2");
-
-    //8 slots 
-    // while (GetFloat("l4d_multislots_max_survivors") != 8)
-    // {   
-    //     SetValue("l4d_multislots_max_survivors", 8);
-    //     SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
-    //     SetValue("l4d_multislots_respawnhp", 100);
-    //     SetValue("l4d_multislots_respawnbuffhp", 0);
-    //     SetValue("l4d_multislots_firstweapon", 0);
-    //     SetValue("l4d_multislots_secondweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-    //     SetValue("l4d_multislots_forthweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-
-    //     //just in case
-    //     SendToServerConsole("l4d_multislots_max_survivors 8");
-    //     SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
-    //     SendToServerConsole("l4d_multislots_respawnhp 100");
-    //     SendToServerConsole("l4d_multislots_respawnbuffhp 0");
-    //     SendToServerConsole("l4d_multislots_firstweapon 0");
-    //     SendToServerConsole("l4d_multislots_secondweapon 0");
-    //     SendToServerConsole("l4d_multislots_thirdweapon 0");
-    //     SendToServerConsole("l4d_multislots_forthweapon 0");
-    //     SendToServerConsole("l4d_multislots_fifthweapon 0");
-    // }
 }
 
 //speedrun timer, doesn't work on dedicated :/
@@ -387,10 +362,6 @@ function OnGameEvent_round_start_post_nav(params)
 {
     SetCVars();
     MapOverrides();
-    // SetValue("l4d_multislots_max_survivors", 8);
-    // SetValue("l4d_multislots_spawn_survivors_roundstart", 1);    
-    // SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
-    // SendToServerConsole("l4d_multislots_max_survivors 8");
     SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
     HUDSetLayout(SpeedrunHUD);
 
