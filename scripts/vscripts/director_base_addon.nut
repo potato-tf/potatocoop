@@ -983,12 +983,10 @@ function OnGameEvent_zombie_ignited(params)
     if (tank != "Tank" ) return;
 
     SetValue("z_tank_speed", 240);
-    SetValue("z_tank_attack_interval", 1);
 }
 function OnGameEvent_tank_killed(params)
 {
     SetValue("z_tank_speed", 210);
-    SetValue("z_tank_attack_interval", 1.5);
 }
 
 //bile rounds for explosive ammo on grenade launcher
