@@ -7,7 +7,8 @@ Msg("Running potatocoop's director_base_addon.nut script\n")
 IncludeScript("netpropperf.nut")
 
 
-const CRAWL_SPEED = 20;
+const CRAWL_SPEED = 35;
+const M60_CLIP_MAX = 450;
 // const CRICKET_INDEX = 748;
 // const RIOT_INDEX = 740;
 // const CRICKET_WORLDINDEX = 658;
@@ -21,6 +22,7 @@ local maplist = ["c1m1_hotel", "c2m1_highway", "c3m1_plankcountry", "c4m1_millto
 local weaponsToConvert;
 local saferoomdoor;
 local originalname;
+local survmodellist = ["models/survivors/survivor_gambler.mdl", "models/survivors/survivor_producer.mdl", "models/survivors/survivor_coach.mdl", "models/survivors/survivor_mechanic.mdl", "models/survivors/survivor_namvet.mdl", "models/survivors/survivor_teenangst.mdl", "models/survivors/survivor_biker.mdl", "models/survivors/survivor_manager.mdl"]
 
 //director tweaks
 DirectorOptions <- 
@@ -32,6 +34,11 @@ DirectorOptions <-
     SpecialInitialSpawnDelayMin = 0
     SpecialInitialSpawnDelayMin = 15
     ZombieTankHealth = 6000
+    cm_InfiniteFuel = 1
+    AllowWitchesInCheckpoints = 1
+    cm_ProhibitBosses = false
+    TankHitDamageModifierCoop = 0.4
+    cm_AggressiveSpecials = false
 
     CommonLimit = 65
 	HunterLimit = 4
@@ -82,6 +89,9 @@ if (!IsModelPrecached("models/weapons/melee/w_riotshield.mdl"))
 if (!IsModelPrecached("models/weapons/melee/v_riotshield.mdl"))
     PrecacheModel("models/weapons/melee/v_riotshield.mdl");
 
+if (!IsModelPrecached("models/props_doors/door_urban_rooftop_damaged_break.mdl"))
+    PrecacheModel("models/props_doors/door_urban_rooftop_damaged_break.mdl")
+
 if (!IsModelPrecached("models/survivors/survivor_mechanic.mdl"))
     PrecacheModel("models/survivors/survivor_mechanic.mdl")
     
@@ -109,25 +119,27 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
 //cvars
 ::SetCVars <- function()
 {
+    //survivors
     SetValue("survivor_allow_crawling", 1);
     SetValue("survivor_crawl_speed", CRAWL_SPEED);
-    SetValue("boomer_leaker_chance", 20);
+    SetValue("ammo_shotgun_max", 90);
+    SetValue("survivor_burn_factor_expert", 0.35);
+    SetValue("sm_cvar survivor_friendly_fire_factor_expert" 0);
+
+    //infected
+    SetValue("boomer_leaker_chance", 15);
     SetValue("smoker_tongue_delay", 0.5);
     SetValue("z_health", 10);
     SetValue("z_jockey_health", 250);
     SetValue("z_difficulty", "impossible");
-    SetValue("mp_friendlyfire", 0);
-    SetValue("survivor_burn_factor_expert ", 0.2);
-
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_normal 0");
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_hard 0");
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_expert 0");
 
     //100 tick related
     SetValue("sv_maxupdaterate", 100); 
     SetValue("sv_maxcmdrate", 100); 
+    SetValue("sv_mincmdrate", 100); 
     SetValue("net_splitpacket_maxrate", 100000); 
-    SetValue("fps_max", 150); 
+    SetValue("rate", 100000)
+    SetValue("fps_max", 1000); 
     SetValue("nb_update_frequency", 0.03); 
     SendToServerConsole("nb_update_frequency 0.03");
 
@@ -139,9 +151,9 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     //maxplayers override, requires plugins
     SetValue("sv_maxplayers", 8);
     SetValue("sv_visiblemaxplayers", 8);
-    SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
-    SendToServerConsole("sm_cvar l4d_autojoin 2");
+    SetValue("sm_cvar l4d_survivor_limit", 8);
+    SetValue("sm_cvar l4d_static_minimum_survivor", 8);
+    SetValue("sm_cvar l4d_autojoin", 2);
 }
 
 //speedrun timer, doesn't work on dedicated :/
@@ -197,6 +209,78 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
         closetradius = 64;
     }
     printl("||||Dark Carnival Override Loaded||||")
+}
+
+::NoMercyOverride <- function()
+{
+    //block the street like zonemod
+    if (mapname == "c8m1_apartment")
+    {
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2418, 3799, 4)
+            angles = Vector(-1.5, 270, 0)
+            model = "models/props_vehicles/semi_trailer_wrecked.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2115, 3892, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade2.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2726, 3772, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2786, 3772, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2109, 3892, 2248)
+            mins = "-77 -1 -2232"
+            maxs = "77 1 2232"
+            initialstate = 1
+            BlockType = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2419, 3776, 2312)
+            mins = "-267 -59 -2168"
+            maxs = "267 59 2168"
+            initialstate = 1
+            BlockType = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2753, 3772, 2248)
+            mins = "-68 -1 -2232"
+            maxs = "68 1 2232"
+            initialstate = 1
+            BlockType = 1
+        })
+    }
+    //block storage room path
+    if (mapname == "c8m3_sewers")
+    {
+        printl(mapname)
+
+        SpawnEntityFromTable("prop_dynamic_override", {
+            origin = Vector(11268.054688, 4664, 15.803272)
+            angles = Vector(0, 90, 0)
+            model = "models/props_doors/door_urban_rooftop_damaged_break.mdl"
+            solid = 6
+            disableshadows = 1
+            
+        })
+    }
+    printl("||||No Mercy Override Loaded||||")
 }
 
 ::ColdStreamOverride <- function()
@@ -266,7 +350,6 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 
             if ( mapname.slice(0, mapprefixtruncated[i].len()) == mapprefixtruncated[i])
             {
-                printl(mapname.slice(0, mapprefixtruncated[i].len()))
                 local mapindex = (ceil((i.tofloat() + 1.0) / 2.0))
 
                 MapCase(mapindex)
@@ -293,8 +376,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     //     PassingOverride(); break;
     // case 7:
     //     SacrificeOverride(); break;
-    // case 8:
-    //     NoMercyOverride(); break;
+    case 8:
+        NoMercyOverride(); break;
     // case 9:
     //     CrashCourseOverride(); break;
     // case 10:
@@ -316,19 +399,27 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 {
 
     //idk why just putting this cvar in server.cfg or SetCVars doesn't work
-    if (GetFloat("l4d_survivor_limit") != 8)
-    {
-        SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
-        SendToServerConsole("sm_cvar l4d_autojoin 2");
-    }
+    // if (GetFloat("l4d_survivor_limit") != 8)
+    // {
+    //     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
+    //     SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+    //     SendToServerConsole("sm_cvar l4d_autojoin 2");
+    // }
 
     //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
+    //wanted to use this to force l4d2 chars on l4d1 maps but doesn't work
     for (local i = 1; i < GetFloat("l4d_survivor_limit"); i++)
     {
         local player = PlayerInstanceFromIndex(i);
-        if (player != null && player.GetModelName() == "models/survivors/survivor_teenangst.mdl" && GetPropInt(player, "m_survivorCharacter") !=5 )
-            SetPropInt(player, "m_survivorCharacter", 5);
+        for (local i  = 0; i < survmodellist.len(); i++)
+        {
+            // printl(GetPropInt(player, "m_survivorCharacter"))
+            if (player != null && player.GetModelName() == survmodellist[i] && GetPropInt(player, "m_survivorCharacter") != i )
+            {
+                SetPropInt(player, "m_survivorCharacter", i);
+                printl("set " + player + " with model " + player.GetModelName() + " to survivor index " + i)
+            }
+        }
         
     }
 
@@ -568,6 +659,10 @@ function OnGameEvent_item_pickup(params)
     //         hasriotshield = true;
     //     }
     // }
+
+    if (weapon == "rifle_m60")
+        wepent.SetClip1(M60_CLIP_MAX)
+    
 }
 
 // function OnGameEvent_weapon_drop(params)
@@ -802,7 +897,9 @@ const MAX_WEAPONS = 6;
 {
 	for( local player; player = Entities.FindByClassname(player, "player"); )
 	{
+
 		local activeWeapon = NetProps.GetPropEntity(player, "m_hActiveWeapon");
+        if (activeWeapon == null) return;
 		if( activeWeapon.GetClassname() == "weapon_rifle_sg552" )
 		{
 			local scope = activeWeapon.GetScriptScope();
