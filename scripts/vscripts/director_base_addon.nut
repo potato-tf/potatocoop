@@ -124,7 +124,7 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     SetValue("survivor_crawl_speed", CRAWL_SPEED);
     SetValue("ammo_shotgun_max", 90);
     SetValue("survivor_burn_factor_expert", 0.35);
-    SetValue("sm_cvar survivor_friendly_fire_factor_expert" 0);
+    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_expert 0");
 
     //infected
     SetValue("boomer_leaker_chance", 15);
@@ -151,12 +151,11 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     //maxplayers override, requires plugins
     SetValue("sv_maxplayers", 8);
     SetValue("sv_visiblemaxplayers", 8);
-    SetValue("sm_cvar l4d_survivor_limit", 8);
-    SetValue("sm_cvar l4d_static_minimum_survivor", 8);
-    SetValue("sm_cvar l4d_autojoin", 2);
-}
+    SendToServerConsole("sm_cvar l4d_survivor_limit 8");
+    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+    SendToServerConsole("sm_cvar l4d_autojoin 2");
 
-//speedrun timer, doesn't work on dedicated :/
+}
 
 //replace all map spawned scouts
 //does this even work?
@@ -164,7 +163,7 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 {
     weaponsToConvert =
     {
-        weapon_sniper_scout = "weapon_hunting_rifle_spawn"
+        weapon_sniper_scout_spawn = "weapon_hunting_rifle_spawn"
     }
 
 } else {
@@ -183,7 +182,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     {
         closetradius = 300;
         //force cola panic event (for some reason panic events break after doing our own panic events for the rescue closets)
-        DoEntFire("store_alarm_relay", "AddOutput", "OnTrigger info_director:ForcePanicEvent::0:-1", 0.0, null, null);
+        //update: this was caused by fucking with the info_director targetname
+        // DoEntFire("store_alarm_relay", "AddOutput", "OnTrigger info_director:ForcePanicEvent::0:-1", 0.0, null, null);
     }
 
     //force lower path
@@ -396,16 +396,22 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 
 //general think function
 ::MainThink <- function()
-{
-
+{    
     //idk why just putting this cvar in server.cfg or SetCVars doesn't work
-    // if (GetFloat("l4d_survivor_limit") != 8)
-    // {
-    //     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-    //     SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
-    //     SendToServerConsole("sm_cvar l4d_autojoin 2");
-    // }
+    if (GetFloat("l4d_survivor_limit") != 8)
+    {
+        SendToServerConsole("sm_cvar l4d_survivor_limit 8");
+        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+        SendToServerConsole("sm_cvar l4d_autojoin 2");
 
+        //tank/director stuff
+        SendToServerConsole("sm_cvar director_max_threat_areas 16");
+        SendToServerConsole("sm_cvar director_threat_max_separation 1000");
+        SendToServerConsole("sm_cvar director_threat_min_separation 100");
+        SendToServerConsole("sm_cvar director_tank_max_interval 4000");
+        SendToServerConsole("sm_cvar director_tank_min_interval 2000");
+        SendToServerConsole("sm_cvar director_tank_checkpoint_interval 60");
+    }
     //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
     //wanted to use this to force l4d2 chars on l4d1 maps but doesn't work
     for (local i = 1; i < GetFloat("l4d_survivor_limit"); i++)
@@ -453,6 +459,8 @@ function OnGameEvent_round_start_post_nav(params)
 {
     SetCVars();
     MapOverrides();
+
+    //speedrun timer, doesn't work on dedicated :/
     SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
     HUDSetLayout(SpeedrunHUD);
 
