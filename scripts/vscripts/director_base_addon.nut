@@ -6,68 +6,6 @@ Msg("Running potatocoop's director_base_addon.nut script\n")
 //stole from give_tf_weapon library but it fails to include here?
 IncludeScript("netpropperf.nut")
 
-
-const CRAWL_SPEED = 35;
-const M60_CLIP_MAX = 450;
-// const CRICKET_INDEX = 748;
-// const RIOT_INDEX = 740;
-// const CRICKET_WORLDINDEX = 658;
-
-local mapname = Director.GetMapName();
-local lockedclosets = false;
-local firsthint = false;
-local hasriotshield = false;
-local closetradius = 256;
-local maplist = ["c1m1_hotel", "c2m1_highway", "c3m1_plankcountry", "c4m1_milltown_a", "c5m1_waterfront", "c6m1_riverbank", "c7m1_docks", "c8m1_apartment", "c9m1_alleys", "c10m1_caves", "c11m1_greenhouse", "c12m1_hilltop", "c13m1_alpinecreek", "c14m1_junkyard"]
-local weaponsToConvert;
-local saferoomdoor;
-local originalname;
-local survmodellist = ["models/survivors/survivor_gambler.mdl", "models/survivors/survivor_producer.mdl", "models/survivors/survivor_coach.mdl", "models/survivors/survivor_mechanic.mdl", "models/survivors/survivor_namvet.mdl", "models/survivors/survivor_teenangst.mdl", "models/survivors/survivor_biker.mdl", "models/survivors/survivor_manager.mdl"]
-
-//director tweaks
-DirectorOptions <- 
-{
-	SpecialRespawnInterval = 12
-    MaxSpecials = 6
-    BaseSpecialLimit = 2
-    SpecialSlotCountdownTime = 1
-    SpecialInitialSpawnDelayMin = 0
-    SpecialInitialSpawnDelayMin = 15
-    ZombieTankHealth = 6000
-    cm_InfiniteFuel = 1
-    AllowWitchesInCheckpoints = 1
-    cm_ProhibitBosses = false
-    TankHitDamageModifierCoop = 0.4
-    cm_AggressiveSpecials = false
-
-    CommonLimit = 65
-	HunterLimit = 4
-	BoomerLimit = 2
-	ChargerLimit = 2
-	JockeyLimit = 1
-	SmokerLimit = 1
-	SpitterLimit = 1
-
-	function ConvertWeaponSpawn(classname)
-	{
-        printl("name" + classname)
-		if ( classname in weaponsToConvert )
-		{
-			printl(classname + "converted")
-            return weaponsToConvert[classname];
-		}
-		return 0;
-	}
-}
-
-printl("******************");
-printl("******************");
-printl("******************");
-printl("Potato coop loaded");
-printl("******************");
-printl("******************");
-printl("******************");
-
 if (!IsModelPrecached("models/infected/boomette.mdl"))
     PrecacheModel("models/infected/boomette.mdl");
 
@@ -116,6 +54,68 @@ if (!IsModelPrecached("models/survivors/survivor_manager.mdl"))
 if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     PrecacheModel("models/survivors/survivor_namvet.mdl")
 
+
+const CRAWL_SPEED = 35;
+const M60_CLIP_MAX = 450;
+// const CRICKET_INDEX = 748;
+// const RIOT_INDEX = 740;
+// const CRICKET_WORLDINDEX = 658;
+
+local mapname = Director.GetMapName();
+local lockedclosets = false;
+local firsthint = false;
+local hasriotshield = false;
+local closetradius = 256;
+local maplist = ["c1m1_hotel", "c2m1_highway", "c3m1_plankcountry", "c4m1_milltown_a", "c5m1_waterfront", "c6m1_riverbank", "c7m1_docks", "c8m1_apartment", "c9m1_alleys", "c10m1_caves", "c11m1_greenhouse", "c12m1_hilltop", "c13m1_alpinecreek", "c14m1_junkyard"]
+local survmodellist = ["models/survivors/survivor_gambler.mdl", "models/survivors/survivor_producer.mdl", "models/survivors/survivor_coach.mdl", "models/survivors/survivor_mechanic.mdl", "models/survivors/survivor_namvet.mdl", "models/survivors/survivor_teenangst.mdl", "models/survivors/survivor_biker.mdl", "models/survivors/survivor_manager.mdl"]
+local weaponsToConvert;
+local originalname;
+local infodirector;
+
+//director tweaks
+DirectorOptions <- 
+{
+	SpecialRespawnInterval = 12
+    MaxSpecials = 6
+    BaseSpecialLimit = 2
+    SpecialSlotCountdownTime = 1
+    SpecialInitialSpawnDelayMin = 0
+    SpecialInitialSpawnDelayMin = 15
+    ZombieTankHealth = 6000
+    cm_InfiniteFuel = 1
+    AllowWitchesInCheckpoints = 1
+    cm_ProhibitBosses = false
+    TankHitDamageModifierCoop = 0.4
+    cm_AggressiveSpecials = false
+
+    CommonLimit = 65
+	HunterLimit = 4
+	BoomerLimit = 2
+	ChargerLimit = 2
+	JockeyLimit = 1
+	SmokerLimit = 1
+	SpitterLimit = 1
+
+	function ConvertWeaponSpawn(classname)
+	{
+        printl("name" + classname)
+		if ( classname in weaponsToConvert )
+		{
+			printl(classname + "converted")
+            return weaponsToConvert[classname];
+		}
+		return 0;
+	}
+}
+
+printl("******************");
+printl("******************");
+printl("******************");
+printl("Potato coop loaded");
+printl("******************");
+printl("******************");
+printl("******************");
+
 //cvars
 ::SetCVars <- function()
 {
@@ -152,10 +152,11 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     SetValue("sv_maxplayers", 8);
     SetValue("sv_visiblemaxplayers", 8);
     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 4");
     SendToServerConsole("sm_cvar l4d_autojoin 2");
-
 }
+
+//speedrun timer, doesn't work on dedicated :/
 
 //replace all map spawned scouts
 //does this even work?
@@ -285,10 +286,9 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 
 ::ColdStreamOverride <- function()
 {
-    //kill this shit
     if (mapname == "c13m2_southpinestream")
     {
-
+        //kill this shit
         //wanted to make a new one but this doesn't work
         local nonflashbang = SpawnEntityFromTable("env_lightglow", {
             targetname = "newlightglow",
@@ -313,6 +313,12 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
                 DoEntFire("flashbang", "Color", "0 0 0", 1.0, null, null);
             }
         }
+        //delay the tunnel event
+        RemoveOutput(director, "OnDamaged", "event_alarme", "BeginScript", "")
+        // AddOutput(director, "OnDamaged", "event_alarme", "BeginScript", "", 8, 1)
+
+        //use DoEntFire to add a delay just to be safe
+        DoEntFire("info_director", "AddOutput", "OnDamaged event_alarme:BeginScript::8:1", 5, null, null)
     }
     printl("||||Cold Stream Override Loaded||||")
 }
@@ -401,16 +407,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     if (GetFloat("l4d_survivor_limit") != 8)
     {
         SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 4");
         SendToServerConsole("sm_cvar l4d_autojoin 2");
-
-        //tank/director stuff
-        SendToServerConsole("sm_cvar director_max_threat_areas 16");
-        SendToServerConsole("sm_cvar director_threat_max_separation 1000");
-        SendToServerConsole("sm_cvar director_threat_min_separation 100");
-        SendToServerConsole("sm_cvar director_tank_max_interval 4000");
-        SendToServerConsole("sm_cvar director_tank_min_interval 2000");
-        SendToServerConsole("sm_cvar director_tank_checkpoint_interval 60");
     }
     //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
     //wanted to use this to force l4d2 chars on l4d1 maps but doesn't work
@@ -458,23 +456,17 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 function OnGameEvent_round_start_post_nav(params)
 {
     SetCVars();
-    MapOverrides();
-
-    //speedrun timer, doesn't work on dedicated :/
     SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
     HUDSetLayout(SpeedrunHUD);
 
-    //apply think function to an ent that exists in every map
-    for (saferoomdoor; saferoomdoor = FindByClassname(saferoomdoor, "prop_door_rotating_checkpoint"); )
-    {
-        saferoomdoor.ValidateScriptScope();
-        saferoomdoor.GetScriptScope().MainThink <- MainThink;
-        AddThinkToEnt(saferoomdoor, "MainThink");
-    }
+    local worldspawn = Entities.FindByClassname(null, "worldspawn")
+        worldspawn.ValidateScriptScope();
+        worldspawn.GetScriptScope().MainThink <- MainThink;
+        AddThinkToEnt(worldspawn, "MainThink");
 
     //get info_director name since we change it to something else for rescue closets
     //not setting this back to the original name will break many events (c10m3_ranchhouse, c2m1_streets cola event, etc)
-    for (local infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
+    for (infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
         originalname = infodirector.GetName()
     
 
@@ -534,10 +526,10 @@ function OnGameEvent_round_start_post_nav(params)
             printl("Scout roll: " + rand + ".  Need 5");
         }
     }
+    MapOverrides();
 }
 
 //leaker model stuff
-//this also forces real zoey with the 8 player stuff
 function OnGameEvent_player_spawn(params)
 {
     local player = GetPlayerFromUserID(params.userid)
@@ -649,24 +641,24 @@ function OnGameEvent_item_pickup(params)
     local wepent = GetPropEntity(player, "m_hActiveWeapon");
     // printl(weapon);
 
-    //replace cricket bat with riot shield
-    // if (weapon == "melee")
-    // {
-    //     printl(wepent);
-    //     printl(vmindex);
-    //     printl(GetPropInt(wepent, "m_nModelIndex"));
-    //     if (vmindex == CRICKET_INDEX)
-    //     {
-    //         SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
-    //         SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
-    //         viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
+    replace cricket bat with riot shield
+    if (weapon == "melee")
+    {
+        printl(wepent);
+        printl(vmindex);
+        printl(GetPropInt(wepent, "m_nModelIndex"));
+        if (vmindex == CRICKET_INDEX)
+        {
+            SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
+            SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
+            viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
 
-    //         SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
-    //         SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
-    //         wepent.SetModel("models/weapons/melee/w_riotshield.mdl");
-    //         hasriotshield = true;
-    //     }
-    // }
+            SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
+            SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
+            wepent.SetModel("models/weapons/melee/w_riotshield.mdl");
+            hasriotshield = true;
+        }
+    }
 
     if (weapon == "rifle_m60")
         wepent.SetClip1(M60_CLIP_MAX)
