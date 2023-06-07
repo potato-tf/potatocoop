@@ -641,7 +641,7 @@ function OnGameEvent_item_pickup(params)
     local wepent = GetPropEntity(player, "m_hActiveWeapon");
     // printl(weapon);
 
-    replace cricket bat with riot shield
+//    replace cricket bat with riot shield
     if (weapon == "melee")
     {
         printl(wepent);
