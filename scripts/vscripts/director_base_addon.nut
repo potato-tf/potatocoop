@@ -6,8 +6,57 @@ Msg("Running potatocoop's director_base_addon.nut script\n")
 //stole from give_tf_weapon library but it fails to include here?
 IncludeScript("netpropperf.nut")
 
+if (!IsModelPrecached("models/infected/boomette.mdl"))
+    PrecacheModel("models/infected/boomette.mdl");
 
-const CRAWL_SPEED = 20;
+if (!IsModelPrecached("models/infected/limbs/exploded_boomette.mdl"))
+    PrecacheModel("models/infected/limbs/exploded_boomette.mdl");
+
+if (!IsModelPrecached("models/infected/boomette.mdl"))
+    PrecacheModel("models/infected/boomette.mdl");
+    
+if (!IsModelPrecached("models/infected/boomer.mdl"))
+    PrecacheModel("models/infected/boomer.mdl");
+
+if (!IsModelPrecached("models/infected/boomer_l4d1.mdl"))
+    PrecacheModel("models/infected/boomer_l4d1.mdl");
+
+if (!IsModelPrecached("models/weapons/melee/w_riotshield.mdl"))
+    PrecacheModel("models/weapons/melee/w_riotshield.mdl");
+
+if (!IsModelPrecached("models/weapons/melee/v_riotshield.mdl"))
+    PrecacheModel("models/weapons/melee/v_riotshield.mdl");
+
+if (!IsModelPrecached("models/props_doors/door_urban_rooftop_damaged_break.mdl"))
+    PrecacheModel("models/props_doors/door_urban_rooftop_damaged_break.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_mechanic.mdl"))
+    PrecacheModel("models/survivors/survivor_mechanic.mdl")
+    
+if (!IsModelPrecached("models/survivors/survivor_gambler.mdl"))
+    PrecacheModel("models/survivors/survivor_gambler")
+
+if (!IsModelPrecached("models/survivors/survivor_coach.mdl"))
+    PrecacheModel("models/survivors/survivor_coach.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_producer.mdl"))
+    PrecacheModel("models/survivors/survivor_producer.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_teenangst.mdl"))
+    PrecacheModel("models/survivors/survivor_teenangst.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_biker.mdl"))
+    PrecacheModel("models/survivors/survivor_biker.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_manager.mdl"))
+    PrecacheModel("models/survivors/survivor_manager.mdl")
+
+if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
+    PrecacheModel("models/survivors/survivor_namvet.mdl")
+
+
+const CRAWL_SPEED = 35;
+const M60_CLIP_MAX = 450;
 // const CRICKET_INDEX = 748;
 // const RIOT_INDEX = 740;
 // const CRICKET_WORLDINDEX = 658;
@@ -18,9 +67,10 @@ local firsthint = false;
 local hasriotshield = false;
 local closetradius = 256;
 local maplist = ["c1m1_hotel", "c2m1_highway", "c3m1_plankcountry", "c4m1_milltown_a", "c5m1_waterfront", "c6m1_riverbank", "c7m1_docks", "c8m1_apartment", "c9m1_alleys", "c10m1_caves", "c11m1_greenhouse", "c12m1_hilltop", "c13m1_alpinecreek", "c14m1_junkyard"]
+local survmodellist = ["models/survivors/survivor_gambler.mdl", "models/survivors/survivor_producer.mdl", "models/survivors/survivor_coach.mdl", "models/survivors/survivor_mechanic.mdl", "models/survivors/survivor_namvet.mdl", "models/survivors/survivor_teenangst.mdl", "models/survivors/survivor_biker.mdl", "models/survivors/survivor_manager.mdl"]
 local weaponsToConvert;
-local saferoomdoor;
 local originalname;
+local infodirector;
 
 //director tweaks
 DirectorOptions <- 
@@ -32,6 +82,11 @@ DirectorOptions <-
     SpecialInitialSpawnDelayMin = 0
     SpecialInitialSpawnDelayMin = 15
     ZombieTankHealth = 6000
+    cm_InfiniteFuel = 1
+    AllowWitchesInCheckpoints = 1
+    cm_ProhibitBosses = false
+    TankHitDamageModifierCoop = 0.4
+    cm_AggressiveSpecials = false
 
     CommonLimit = 65
 	HunterLimit = 4
@@ -61,73 +116,30 @@ printl("******************");
 printl("******************");
 printl("******************");
 
-if (!IsModelPrecached("models/infected/boomette.mdl"))
-    PrecacheModel("models/infected/boomette.mdl");
-
-if (!IsModelPrecached("models/infected/limbs/exploded_boomette.mdl"))
-    PrecacheModel("models/infected/limbs/exploded_boomette.mdl");
-
-if (!IsModelPrecached("models/infected/boomette.mdl"))
-    PrecacheModel("models/infected/boomette.mdl");
-    
-if (!IsModelPrecached("models/infected/boomer.mdl"))
-    PrecacheModel("models/infected/boomer.mdl");
-
-if (!IsModelPrecached("models/infected/boomer_l4d1.mdl"))
-    PrecacheModel("models/infected/boomer_l4d1.mdl");
-
-if (!IsModelPrecached("models/weapons/melee/w_riotshield.mdl"))
-    PrecacheModel("models/weapons/melee/w_riotshield.mdl");
-
-if (!IsModelPrecached("models/weapons/melee/v_riotshield.mdl"))
-    PrecacheModel("models/weapons/melee/v_riotshield.mdl");
-
-if (!IsModelPrecached("models/survivors/survivor_mechanic.mdl"))
-    PrecacheModel("models/survivors/survivor_mechanic.mdl")
-    
-if (!IsModelPrecached("models/survivors/survivor_gambler.mdl"))
-    PrecacheModel("models/survivors/survivor_gambler")
-
-if (!IsModelPrecached("models/survivors/survivor_coach.mdl"))
-    PrecacheModel("models/survivors/survivor_coach.mdl")
-
-if (!IsModelPrecached("models/survivors/survivor_producer.mdl"))
-    PrecacheModel("models/survivors/survivor_producer.mdl")
-
-if (!IsModelPrecached("models/survivors/survivor_teenangst.mdl"))
-    PrecacheModel("models/survivors/survivor_teenangst.mdl")
-
-if (!IsModelPrecached("models/survivors/survivor_biker.mdl"))
-    PrecacheModel("models/survivors/survivor_biker.mdl")
-
-if (!IsModelPrecached("models/survivors/survivor_manager.mdl"))
-    PrecacheModel("models/survivors/survivor_manager.mdl")
-
-if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
-    PrecacheModel("models/survivors/survivor_namvet.mdl")
-
 //cvars
 ::SetCVars <- function()
 {
+    //survivors
     SetValue("survivor_allow_crawling", 1);
     SetValue("survivor_crawl_speed", CRAWL_SPEED);
-    SetValue("boomer_leaker_chance", 20);
+    SetValue("ammo_shotgun_max", 90);
+    SetValue("survivor_burn_factor_expert", 0.35);
+    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_expert 0");
+
+    //infected
+    SetValue("boomer_leaker_chance", 15);
     SetValue("smoker_tongue_delay", 0.5);
     SetValue("z_health", 10);
     SetValue("z_jockey_health", 250);
     SetValue("z_difficulty", "impossible");
-    SetValue("mp_friendlyfire", 0);
-    SetValue("survivor_burn_factor_expert ", 0.2);
-
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_normal 0");
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_hard 0");
-    SendToServerConsole("sm_cvar survivor_friendly_fire_factor_expert 0");
 
     //100 tick related
     SetValue("sv_maxupdaterate", 100); 
     SetValue("sv_maxcmdrate", 100); 
+    SetValue("sv_mincmdrate", 100); 
     SetValue("net_splitpacket_maxrate", 100000); 
-    SetValue("fps_max", 150); 
+    SetValue("rate", 100000)
+    SetValue("fps_max", 1000); 
     SetValue("nb_update_frequency", 0.03); 
     SendToServerConsole("nb_update_frequency 0.03");
 
@@ -140,33 +152,8 @@ if (!IsModelPrecached("models/survivors/survivor_namvet.mdl"))
     SetValue("sv_maxplayers", 8);
     SetValue("sv_visiblemaxplayers", 8);
     SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+    SendToServerConsole("sm_cvar l4d_static_minimum_survivor 4");
     SendToServerConsole("sm_cvar l4d_autojoin 2");
-
-    //8 slots 
-    // while (GetFloat("l4d_multislots_max_survivors") != 8)
-    // {   
-    //     SetValue("l4d_multislots_max_survivors", 8);
-    //     SetValue("l4d_multislots_spawn_survivors_roundstart", 1);
-    //     SetValue("l4d_multislots_respawnhp", 100);
-    //     SetValue("l4d_multislots_respawnbuffhp", 0);
-    //     SetValue("l4d_multislots_firstweapon", 0);
-    //     SetValue("l4d_multislots_secondweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-    //     SetValue("l4d_multislots_forthweapon", 0);
-    //     SetValue("l4d_multislots_thirdweapon", 0);
-
-    //     //just in case
-    //     SendToServerConsole("l4d_multislots_max_survivors 8");
-    //     SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
-    //     SendToServerConsole("l4d_multislots_respawnhp 100");
-    //     SendToServerConsole("l4d_multislots_respawnbuffhp 0");
-    //     SendToServerConsole("l4d_multislots_firstweapon 0");
-    //     SendToServerConsole("l4d_multislots_secondweapon 0");
-    //     SendToServerConsole("l4d_multislots_thirdweapon 0");
-    //     SendToServerConsole("l4d_multislots_forthweapon 0");
-    //     SendToServerConsole("l4d_multislots_fifthweapon 0");
-    // }
 }
 
 //speedrun timer, doesn't work on dedicated :/
@@ -177,7 +164,7 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 {
     weaponsToConvert =
     {
-        weapon_sniper_scout = "weapon_hunting_rifle_spawn"
+        weapon_sniper_scout_spawn = "weapon_hunting_rifle_spawn"
     }
 
 } else {
@@ -196,7 +183,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     {
         closetradius = 300;
         //force cola panic event (for some reason panic events break after doing our own panic events for the rescue closets)
-        DoEntFire("store_alarm_relay", "AddOutput", "OnTrigger info_director:ForcePanicEvent::0:-1", 0.0, null, null);
+        //update: this was caused by fucking with the info_director targetname
+        // DoEntFire("store_alarm_relay", "AddOutput", "OnTrigger info_director:ForcePanicEvent::0:-1", 0.0, null, null);
     }
 
     //force lower path
@@ -224,12 +212,83 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     printl("||||Dark Carnival Override Loaded||||")
 }
 
+::NoMercyOverride <- function()
+{
+    //block the street like zonemod
+    if (mapname == "c8m1_apartment")
+    {
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2418, 3799, 4)
+            angles = Vector(-1.5, 270, 0)
+            model = "models/props_vehicles/semi_trailer_wrecked.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2115, 3892, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade2.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2726, 3772, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("prop_dynamic", {
+            origin = Vector(2786, 3772, 16)
+            angles = Vector(0, 90, 0)
+            model = "models/props_street/police_barricade.mdl"
+            solid = 6
+            disableshadows = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2109, 3892, 2248)
+            mins = "-77 -1 -2232"
+            maxs = "77 1 2232"
+            initialstate = 1
+            BlockType = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2419, 3776, 2312)
+            mins = "-267 -59 -2168"
+            maxs = "267 59 2168"
+            initialstate = 1
+            BlockType = 1
+        })
+        SpawnEntityFromTable("env_physics_blocker", {
+            origin = Vector(2753, 3772, 2248)
+            mins = "-68 -1 -2232"
+            maxs = "68 1 2232"
+            initialstate = 1
+            BlockType = 1
+        })
+    }
+    //block storage room path
+    if (mapname == "c8m3_sewers")
+    {
+        printl(mapname)
+
+        SpawnEntityFromTable("prop_dynamic_override", {
+            origin = Vector(11268.054688, 4664, 15.803272)
+            angles = Vector(0, 90, 0)
+            model = "models/props_doors/door_urban_rooftop_damaged_break.mdl"
+            solid = 6
+            disableshadows = 1
+            
+        })
+    }
+    printl("||||No Mercy Override Loaded||||")
+}
+
 ::ColdStreamOverride <- function()
 {
-    //kill this shit
     if (mapname == "c13m2_southpinestream")
     {
-
+        //kill this shit
         //wanted to make a new one but this doesn't work
         local nonflashbang = SpawnEntityFromTable("env_lightglow", {
             targetname = "newlightglow",
@@ -254,6 +313,12 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
                 DoEntFire("flashbang", "Color", "0 0 0", 1.0, null, null);
             }
         }
+        //delay the tunnel event
+        RemoveOutput(director, "OnDamaged", "event_alarme", "BeginScript", "")
+        // AddOutput(director, "OnDamaged", "event_alarme", "BeginScript", "", 8, 1)
+
+        //use DoEntFire to add a delay just to be safe
+        DoEntFire("info_director", "AddOutput", "OnDamaged event_alarme:BeginScript::8:1", 5, null, null)
     }
     printl("||||Cold Stream Override Loaded||||")
 }
@@ -291,7 +356,6 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 
             if ( mapname.slice(0, mapprefixtruncated[i].len()) == mapprefixtruncated[i])
             {
-                printl(mapname.slice(0, mapprefixtruncated[i].len()))
                 local mapindex = (ceil((i.tofloat() + 1.0) / 2.0))
 
                 MapCase(mapindex)
@@ -318,8 +382,8 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
     //     PassingOverride(); break;
     // case 7:
     //     SacrificeOverride(); break;
-    // case 8:
-    //     NoMercyOverride(); break;
+    case 8:
+        NoMercyOverride(); break;
     // case 9:
     //     CrashCourseOverride(); break;
     // case 10:
@@ -338,22 +402,28 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 
 //general think function
 ::MainThink <- function()
-{
-
+{    
     //idk why just putting this cvar in server.cfg or SetCVars doesn't work
     if (GetFloat("l4d_survivor_limit") != 8)
     {
         SendToServerConsole("sm_cvar l4d_survivor_limit 8");
-        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 8");
+        SendToServerConsole("sm_cvar l4d_static_minimum_survivor 4");
         SendToServerConsole("sm_cvar l4d_autojoin 2");
     }
-
     //superversus hasn't been updated since the zoey crash fix, cba to recompile the plugin
+    //wanted to use this to force l4d2 chars on l4d1 maps but doesn't work
     for (local i = 1; i < GetFloat("l4d_survivor_limit"); i++)
     {
         local player = PlayerInstanceFromIndex(i);
-        if (player != null && player.GetModelName() == "models/survivors/survivor_teenangst.mdl" && GetPropInt(player, "m_survivorCharacter") !=5 )
-            SetPropInt(player, "m_survivorCharacter", 5);
+        for (local i  = 0; i < survmodellist.len(); i++)
+        {
+            // printl(GetPropInt(player, "m_survivorCharacter"))
+            if (player != null && player.GetModelName() == survmodellist[i] && GetPropInt(player, "m_survivorCharacter") != i )
+            {
+                SetPropInt(player, "m_survivorCharacter", i);
+                printl("set " + player + " with model " + player.GetModelName() + " to survivor index " + i)
+            }
+        }
         
     }
 
@@ -386,25 +456,17 @@ if ( (mapname.slice(2, 5) == "m1_") || (mapname.slice(3, 6) == "m1_") )
 function OnGameEvent_round_start_post_nav(params)
 {
     SetCVars();
-    MapOverrides();
-    // SetValue("l4d_multislots_max_survivors", 8);
-    // SetValue("l4d_multislots_spawn_survivors_roundstart", 1);    
-    // SendToServerConsole("l4d_multislots_spawn_survivors_roundstart 1");
-    // SendToServerConsole("l4d_multislots_max_survivors 8");
     SpeedrunHUD <- { Fields = { timer = { slot = HUD_MID_TOP, special = HUD_SPECIAL_ROUNDTIME, flags = HUD_FLAG_NOBG | HUD_FLAG_AS_TIME, name = "timer" } }, }
     HUDSetLayout(SpeedrunHUD);
 
-    //apply think function to an ent that exists in every map
-    for (saferoomdoor; saferoomdoor = FindByClassname(saferoomdoor, "prop_door_rotating_checkpoint"); )
-    {
-        saferoomdoor.ValidateScriptScope();
-        saferoomdoor.GetScriptScope().MainThink <- MainThink;
-        AddThinkToEnt(saferoomdoor, "MainThink");
-    }
+    local worldspawn = Entities.FindByClassname(null, "worldspawn")
+        worldspawn.ValidateScriptScope();
+        worldspawn.GetScriptScope().MainThink <- MainThink;
+        AddThinkToEnt(worldspawn, "MainThink");
 
     //get info_director name since we change it to something else for rescue closets
     //not setting this back to the original name will break many events (c10m3_ranchhouse, c2m1_streets cola event, etc)
-    for (local infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
+    for (infodirector; infodirector = FindByClassname(infodirector, "info_director"); )
         originalname = infodirector.GetName()
     
 
@@ -464,10 +526,10 @@ function OnGameEvent_round_start_post_nav(params)
             printl("Scout roll: " + rand + ".  Need 5");
         }
     }
+    MapOverrides();
 }
 
 //leaker model stuff
-//this also forces real zoey with the 8 player stuff
 function OnGameEvent_player_spawn(params)
 {
     local player = GetPlayerFromUserID(params.userid)
@@ -579,24 +641,28 @@ function OnGameEvent_item_pickup(params)
     local wepent = GetPropEntity(player, "m_hActiveWeapon");
     // printl(weapon);
 
-    //replace cricket bat with riot shield
-    // if (weapon == "melee")
-    // {
-    //     printl(wepent);
-    //     printl(vmindex);
-    //     printl(GetPropInt(wepent, "m_nModelIndex"));
-    //     if (vmindex == CRICKET_INDEX)
-    //     {
-    //         SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
-    //         SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
-    //         viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
+//    replace cricket bat with riot shield
+    if (weapon == "melee")
+    {
+        printl(wepent);
+        printl(vmindex);
+        printl(GetPropInt(wepent, "m_nModelIndex"));
+        if (vmindex == CRICKET_INDEX)
+        {
+            SetPropInt(viewmodel, "m_nModelIndex", RIOT_INDEX);
+            SetPropString(viewmodel, "m_ModelName", "models/weapons/melee/v_riotshield.mdl");
+            viewmodel.SetModel("models/weapons/melee/v_riotshield.mdl");
 
-    //         SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
-    //         SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
-    //         wepent.SetModel("models/weapons/melee/w_riotshield.mdl");
-    //         hasriotshield = true;
-    //     }
-    // }
+            SetPropInt(wepent, "m_nModelIndex", RIOT_INDEX);
+            SetPropString(wepent, "m_ModelName", "models/weapons/melee/w_riotshield.mdl");
+            wepent.SetModel("models/weapons/melee/w_riotshield.mdl");
+            hasriotshield = true;
+        }
+    }
+
+    if (weapon == "rifle_m60")
+        wepent.SetClip1(M60_CLIP_MAX)
+    
 }
 
 // function OnGameEvent_weapon_drop(params)
@@ -606,30 +672,28 @@ function OnGameEvent_item_pickup(params)
 //     printl("PropID: " + params.propid + " Item: " + params.item)
 // }
 
-// ===========================
-//   DAWGMOD's SG552 - START
-// ===========================
+// =========================
+//  ON-SCOPE LASERS - START
+// =========================
 
 const TEAM_SPECTATE = 1;
 const TEAM_SURVIVOR = 2;
 const TEAM_INFECTED = 3;
 const MAX_WEAPONS = 6;
 
+enum UPGRADEBIT
+{
+	INCENDIARY_AMMO = 1, // (1 << 0)
+	EXPLOSIVE_AMMO  = 2, // (1 << 1)
+	LASER_SIGHT     = 4  // (1 << 2)
+};
+
 /*****************************************************
-	DAWGMOD's SG552
+	SG552's ON-SCOPE LASERS
 	
 	Objective:
-	  Identical stats to vanilla MP5, but spawns with
-	  a permanent laser sight. Scoped shots deal 50
-	  damage on headshot at any range and are 100%
-	  accurate, but consume 2 ammo per shot.
-	  
-	  EDIT:
-	  Ditch the 2 ammo per shot penalty, and have laser sight
-	  while scoped instead.
-	  
-	  EDIT2:
-	  The 2 ammo per shot penalty is back.
+	  Gives SG552 laser sights on scope only, but scoped shots
+	  consume 2 ammo per shot.
 	  
 	Technical limitations:
 	  Using "net_fakelag 120", we can see the following occurs
@@ -643,56 +707,100 @@ const MAX_WEAPONS = 6;
 	  
 	Do these:
 	  1) Toggle laser sights with the "weapon_zoom" event.
-	  Script will check if "m_hZoomOwner" netprop == null.
+	    Script will check if "m_hZoomOwner" netprop == null.
 
-	  2) Track if the primary weapon already had a laser
-	  sight on the "player_use" event so we don't remove
-	  their "real laser".
-	  Script will add a var into their script scope.
+	  2) Remember the player getting the laser upgrade
+	  on the "player_use" event. This is so we don't
+	  remove their laser upgrade when they zoom in.
+	    Script will add the var "scope["HasRealLaser"]" into
+	  their script scope.
 	  
-	  3) Remove the SG552's scoped laser when all survivors
-	  reach and close a checkpoint saferoom, so it won't
-	  carry to the next level.
+	  3) Remove the scope laser from survivors on "map_transition"
+	  event to prevent the laser carrying to the next level.
 	  
-	  4) On new round start, check if SG552 has a real laser.
-	  If true, script will set "scope["HasRealLaser"]" to true.
+	  4) On "player_transitioned" event, check if any weapons
+	  has a laser sight active.
+	    If true, script will set "scope["HasRealLaser"]" to true.
+		
+	  5) While zoomed in, make the weapon use up 2 ammo per shot
+	  on the "weapon_fire" event, which can be accomplised by
+	  doing "SetClip1(weapon.Clip1() - 1)".
+	    For the workshop, this should be made customisable.
+	
+	Bugs:
+	  1) Event "player_use" doesn't fire while the player is
+	  still reloading, so that alone cannot be used to apply
+	  "scope["HasRealLaser"]" on the weapon.
 	  
-	  2A) For some rational reason, "player_use" doesn't fire
-	  when the player is reloading, so that screws over my
-	  function that applies "HasRealLaser".
-	  With that said, script will set "scope["HasRealLaser"]"
-	  to true if both the weapon's "m_bInReload" is true and
-	  the player does receive lasers in the "receive_upgrade" event.
+	  Approach: On the "receive_upgrade" event, check if the
+	  weapon's "m_bInReload" is true. If that is the case, apply
+	  "scope["HasRealLaser"]" to the weapon.
 	  
-	  Orin: DONE.
+	  Orin: DONE ✅
 	  
-	  1A) Have the SG552's use up 2 ammo per shot when firing while
-	  zoomed in. Do this only if we have the fake laser.
-	  Script will do "SetClip1(weapon.Clip1() - 1);" on the game
-	  event "weapon_fire".
+	  2) Shadowysn:
+	  Various actions exit the scoped state by making the SG552
+	  an inactive weapon, however they do not fire the event
+	  "weapon_zoom", giving the player permanent laser sights:
+	    - Switching weapons  
+	    - Picking up a different primary
+	    - Getting incapped (even though getting hurt unzooms with an event)
+	    - Running out of ammo 
+	
+	  APPROACH: Catch these illegal lasers by adding a think
+	  function when the player zooms in, which we can detect
+	  by checking if the weapon's owner exists and if the owner
+	  is zoomed in. Once either the illegal laser is removed
+	  or the player zooms out, the think will be removed.
+	   The think function will be named "ScopeClearThink".
 	  
-	  Orin: DONE.
+	  Orin: DONE ✅
 	  
 	Testing prodecure:
+	> Preparation:
 	  1) In console, "script Convars.SetValue("developer", 1)".
 	  2) Give yourself a SG552 with "give rifle_sg552".
-	  3) Validate "HasRealLaser" by zooming in and out and zooming
-	  in then both jumping and falling off.
-	  4) In console, "ent_create upgrade_laser_sight" then get the
-	  laser upgrade from it while reloading, and then repeat Step 3.
-	  5) Use "warp_all_survivors_to_checkpoint" in console, then while zoomed in close the door. Zoom in then out after map transition
-	  and see if the laser persists.
-	  6) Repeat Step 5 but with a new fresh SG552.
+	  3) Perform the procedures "ILLEGAL SCOPE LASERS" and "TRANSITIONS".
+	  4) In console, do "ent_create upgrade_laser_sight", then get the
+	  laser upgrade from the spawned entity while reloading. Repeat
+	  step 3.
+	
+	> > ILLEGAL SCOPE LASERS:
+	  1) Validate the standard zoom logic is working by doing
+	  each of the following while zoomed in:
+	    - Zooming out after
+		- Jumping
+		- Falling off high ground
+		
+		The laser should not appear while unscoped unless the
+		weapon has laser upgrades.
+
+	  2) Validate the think function is working by doing each
+	  of the following while zoomed in:
+	    - Switching to another item then back  
+	    - Picking up a different primary
+	    - Getting incapped ("hurtme 100" in console)
+	    - Running out of ammo ("ammo_assaultrifle_max 1;give pumpshotgun;give rifle_sg552;ent_create weapon_ammo_spawn;ammo_assaultrifle_max 360")
+		
+		The laser should not appear while unscoped unless the
+		weapon has laser upgrades.
 	  
+	> > TRANSITIONS:
+	  1) Use "warp_all_survivors_to_checkpoint" in console.
+	  2) While zoomed in, close the door.
+	  3) Zoom in then out after map transition and see if the laser persists.
+	  
+	> Helpers:
 	  My alias for tutorial_standards:
-	  - "alias resetscript "unpause;host_timescale 6;sm_slay @s;wait 350;host_timescale 1;give rifle_sg552;setang 10 176 0;ent_create upgrade_laser_sight"
+	  - "alias slaysurvivors "script RurinSlaySurvivors()""
+	  - "alias resetscript "unpause;host_timescale 6;slaysurvivors;wait 400;ent_fire relay_intro_finished trigger;wait 100;host_timescale 1;give rifle_sg552;setang 30 176 0;ent_create upgrade_laser_sight""
 	
 *****************************************************/
 
 // Regexp to turn "function func_a(params)" into "func_a <- function(params)":
 // - FIND: (function )([_a-zA-Z]*)(\()
-// - REPLACE: ::DawgSG552.(\2) <- function(\3)
-::DawgSG552 <- {}
+// - REPLACE: ::OnScopeLasers.(\2) <- function(\3)
+::OnScopeLasers <- {}
 
 // -----------------
 // ++ Game Events ++
@@ -710,34 +818,77 @@ const MAX_WEAPONS = 6;
 - "userid" = "22"
 */
 ////
-::DawgSG552.OnGameEvent_weapon_zoom <- function(params)
+::OnScopeLasers.OnGameEvent_weapon_zoom <- function(params)
 {
     local player = GetPlayerFromUserID(params.userid);
-    local activeWeapon = NetProps.GetPropEntity(player, "m_hActiveWeapon");
+    local activeWeapon = ::GetPropEntity(player, "m_hActiveWeapon");
 
     if ( activeWeapon.GetClassname() != "weapon_rifle_sg552" )
 		return;
 	
-	// (scope && true) returns null.. so (scope != null && true) is needed.
+	// Null means the scope might be non-existant.
+	// Add the think function when we validate the scope.
 	local scope = activeWeapon.GetScriptScope();
-	local hasRealLaser = (scope != null && ("HasRealLaser" in scope));
-	
+	if( scope == null )
+	{
+		// Validate it, then get it again.
+		activeWeapon.ValidateScriptScope();
+		scope = activeWeapon.GetScriptScope();
+		
+		if ( !("ScopeClearThink" in scope) )
+		{
+			scope["ScopeClearThink"] <- ::OnScopeLasers.ScopeClearThink;
+		}
+	}
+
+	local hasRealLaser = ("HasRealLaser" in scope);
 	if( developer() )
 		printl( "SG552 has real laser: " + hasRealLaser );
   
 	if( !hasRealLaser )
 	{
-		local zoomOwner = NetProps.GetPropEntity(player, "m_hZoomOwner");
+		local zoomOwner = ::GetPropEntity(player, "m_hZoomOwner");
 		if ( zoomOwner != null )
 		{
+			AddThinkToEnt(activeWeapon, "ScopeClearThink");
 			player.GiveUpgrade(UPGRADE_LASER_SIGHT);
 		}
 		else
 		{
+			AddThinkToEnt(activeWeapon, null);
 			player.RemoveUpgrade(UPGRADE_LASER_SIGHT);
 		}
 	}
 }.bindenv(this)
+
+// Purpose: Clear the laser sight when the weapon exits the scoped
+// state by being inactive, not firing the "weapon_zoom" event.
+//
+// Notes: Can't remove the think function with "AddThinkToEnt(self,null)"
+// if done inside the think function itself.
+// Shouldn't bindenv this! 
+//
+::OnScopeLasers.ScopeClearThink <- function()
+{	
+	local owner = ::GetPropEntity(self, "m_hOwnerEntity");
+	if( owner == null || ::GetPropEntity(owner, "m_hZoomOwner") == null )
+	{
+		local upgradeBitVec = ::GetPropInt(self, "m_upgradeBitVec");
+		if( (upgradeBitVec & UPGRADEBIT.LASER_SIGHT) )
+		{
+			::SetPropInt(self, "m_upgradeBitVec", upgradeBitVec & ~4);
+			
+			if( developer() )
+				printl("Removed illegal laser.")
+			
+			EntFire("!activator", "RunScriptCode", "AddThinkToEnt(self, null)", 0.1, self);
+			return RAND_MAX;
+		}
+	}
+	
+	// 3 times per second
+	return (1.0 / 3);
+}
 
 // Purpose: Have the SG552 use 2 ammo per shot when firing
 // while zoomed in, but only if we have the fake laser.
@@ -751,13 +902,13 @@ const MAX_WEAPONS = 6;
 - "count" = "1"
 */
 ////
-::DawgSG552.OnGameEvent_weapon_fire <- function( params )
+::OnScopeLasers.OnGameEvent_weapon_fire <- function( params )
 {
 	local player = GetPlayerFromUserID(params.userid);
 	local wep = params.weapon;
-	local weapon = GetPropEntity(player, "m_hActiveWeapon");
+	local weapon = ::GetPropEntity(player, "m_hActiveWeapon");
 
-	if (GetPropEntity(player, "m_hZoomOwner") != null && wep == "rifle_sg552")
+	if ( ::GetPropEntity(player, "m_hZoomOwner") != null && wep == "rifle_sg552")
 	{
 		local scope = weapon.GetScriptScope();
 		local hasRealLaser = (scope != null && ("HasRealLaser" in scope));
@@ -777,7 +928,7 @@ const MAX_WEAPONS = 6;
 - "targetid" = "191"
 */
 ////
-::DawgSG552.OnGameEvent_player_use <- function( params )
+::OnScopeLasers.OnGameEvent_player_use <- function( params )
 {
 	local player = GetPlayerFromUserID(params.userid);
 	local targetEnt = EntIndexToHScript(params.targetid);
@@ -803,7 +954,7 @@ const MAX_WEAPONS = 6;
 - "upgrade" = "LASER_SIGHT"
 */
 ////
-::DawgSG552.OnGameEvent_receive_upgrade <- function( params )
+::OnScopeLasers.OnGameEvent_receive_upgrade <- function( params )
 {
 	local player = GetPlayerFromUserID(params.userid);
 	local upgrade = params.upgrade;
@@ -813,7 +964,7 @@ const MAX_WEAPONS = 6;
 		local sg552 = FindInPlayerInv("weapon_rifle_sg552", player);
 		if( sg552 != null )
 		{
-			if( NetProps.GetPropInt(sg552, "m_bInReload") == 1 )
+			if( ::GetPropInt(sg552, "m_bInReload") == 1 )
 				SetHasRealLaser(sg552, true);
 		}
 	}
@@ -827,12 +978,12 @@ const MAX_WEAPONS = 6;
 /* Server event "map_transition", Tick 1239:
 */
 ////
-::DawgSG552.OnGameEvent_map_transition <- function( params )
+::OnScopeLasers.OnGameEvent_map_transition <- function( params )
 {
-	for( local player; player = Entities.FindByClassname(player, "player"); )
+	for( local player; player = ::FindByClassname(player, "player"); )
 	{
-		local activeWeapon = NetProps.GetPropEntity(player, "m_hActiveWeapon");
-		if( activeWeapon.GetClassname() == "weapon_rifle_sg552" )
+		local activeWeapon = ::GetPropEntity(player, "m_hActiveWeapon");
+		if( activeWeapon != null && activeWeapon.GetClassname() == "weapon_rifle_sg552" )
 		{
 			local scope = activeWeapon.GetScriptScope();
 			local hasRealLaser = (scope != null && ("HasRealLaser" in scope));
@@ -854,18 +1005,15 @@ const MAX_WEAPONS = 6;
 */
 ////
 
-::DawgSG552.OnGameEvent_player_transitioned <- function( params )
+::OnScopeLasers.OnGameEvent_player_transitioned <- function( params )
 {
 	local player = GetPlayerFromUserID(params.userid);
 	local sg552 = FindInPlayerInv("weapon_rifle_sg552", player);
 	
 	if( sg552 != null )
 	{
-		// UPGRADE_INCENDIARY_AMMO = 1 (1 << 0)
-		// UPGRADE_EXPLOSIVE_AMMO  = 2 (1 << 1)
-		// UPGRADE_LASER_SIGHT     = 4 (1 << 2)
-		local upgradeBitVec = NetProps.GetPropInt( sg552, "m_upgradeBitVec" );
-		if( (upgradeBitVec & 4) != 0 )
+		local upgradeBitVec = ::GetPropInt( sg552, "m_upgradeBitVec" );
+		if( (upgradeBitVec & UPGRADEBIT.LASER_SIGHT) != 0 )
 		{
 			SetHasRealLaser(sg552, true);
 		}
@@ -876,9 +1024,8 @@ const MAX_WEAPONS = 6;
 // ++ Helpers ++
 // -------------
 // These functions do not validate arguments before using them.
-// Weak refs are so they point to same space in memory.
 
-::DawgSG552.SetHasRealLaser <- function(weapon, val)
+::OnScopeLasers.SetHasRealLaser <- function(weapon, val)
 {
 	weapon.ValidateScriptScope();
 	local scope = weapon.GetScriptScope();
@@ -887,26 +1034,26 @@ const MAX_WEAPONS = 6;
 	if( developer() )
 		printl( "SetHasRealLaser: " + weapon.GetClassname() + " to " + val );
 }
-::SetHasRealLaser <- ::DawgSG552.SetHasRealLaser.weakref().ref()
+::SetHasRealLaser <- ::OnScopeLasers.SetHasRealLaser;
 
-::DawgSG552.FindInPlayerInv <- function(weapon_name, player)
+::OnScopeLasers.FindInPlayerInv <- function(weapon_name, player)
 {
 	for( local i = 0; i < MAX_WEAPONS; i++ )
 	{
-		local weapon = NetProps.GetPropEntityArray(player, "m_hMyWeapons", i);
+		local weapon = ::GetPropEntityArray(player, "m_hMyWeapons", i);
 		if( weapon != null && weapon.GetClassname() == weapon_name )
 		{
 			return weapon;
 		}
 	}
 }
-::FindInPlayerInv <- ::DawgSG552.FindInPlayerInv.weakref().ref()
+::FindInPlayerInv <- ::OnScopeLasers.FindInPlayerInv;
 
-__CollectGameEventCallbacks(::DawgSG552)
+__CollectGameEventCallbacks(::OnScopeLasers)
 
-// =========================
-//   DAWGMOD's SG552 - END
-// =========================
+// =======================
+//  ON-SCOPE LASERS - END
+// =======================
 
 //tank rage, faster move speed and attack speed
 function OnGameEvent_zombie_ignited(params)
@@ -914,13 +1061,11 @@ function OnGameEvent_zombie_ignited(params)
     local tank = params.victimname;
     if (tank != "Tank" ) return;
 
-    SetValue("z_tank_speed", 230);
-    SetValue("z_tank_attack_interval", 1);
+    SetValue("z_tank_speed", 240);
 }
 function OnGameEvent_tank_killed(params)
 {
     SetValue("z_tank_speed", 210);
-    SetValue("z_tank_attack_interval", 1.5);
 }
 
 //bile rounds for explosive ammo on grenade launcher
