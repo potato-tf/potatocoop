@@ -843,7 +843,7 @@ enum UPGRADEBIT
 
 	local hasRealLaser = ("HasRealLaser" in scope);
 	if( developer() )
-		printl( "SG552 has real laser: " + hasRealLaser );
+	    printl( "SG552 has real laser: " + hasRealLaser );
   
 	if( !hasRealLaser )
 	{
@@ -1032,7 +1032,7 @@ enum UPGRADEBIT
 	scope["HasRealLaser"] <- val;
 	
 	if( developer() )
-		printl( "SetHasRealLaser: " + weapon.GetClassname() + " to " + val );
+	    printl( "SetHasRealLaser: " + weapon.GetClassname() + " to " + val );
 }
 ::SetHasRealLaser <- ::OnScopeLasers.SetHasRealLaser;
 

@@ -32,6 +32,7 @@
 ::AddOutput <- ::EntityOutputs.AddOutput.bindenv(::EntityOutputs);
 
 ::FindByClassname <- ::Entities.FindByClassname.bindenv(::Entities);
+::FindByClassnameWithin <- ::Entities.FindByClassnameWithin.bindenv(::Entities);
 
 
 //don't exist in l4d2
